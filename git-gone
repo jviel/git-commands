@@ -1,0 +1,23 @@
+#!/bin/bash
+
+function yes_or_no {
+    while true; do
+        read -p "$* [y/n]: " yn
+        case $yn in
+            [Yy]*) return 0  ;;  
+            [Nn]*) echo "Aborted" ; return  1 ;;
+        esac
+    done
+}
+
+branches=`git fetch -p ; git branch -r | awk '{print $1}' | egrep -v -f /dev/fd/0 <(git branch -vv | grep origin) | awk '{print $1}'`
+
+if [[ $branches -eq '' ]]; then
+  echo "nothing to be done"
+  exit 0
+fi
+
+echo "Do you want to remove all these local branches? Some may not be merged." echo
+echo $branches
+yes_or_no "proceed?" && echo $branches | xargs git branch -D
+
